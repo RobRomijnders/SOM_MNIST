@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Som mnist by RobRomijnders</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Som mnist</h1>
+        <p>Repository for SOM implementation on MNIST</p>
+
+        <p class="view"><a href="https://github.com/RobRomijnders/SOM_MNIST">View the Project on GitHub <small>RobRomijnders/SOM_MNIST</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/RobRomijnders/SOM_MNIST/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/RobRomijnders/SOM_MNIST/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/RobRomijnders/SOM_MNIST">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h3>
+<a id="self-organizing-maps" class="anchor" href="#self-organizing-maps" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Self Organizing maps</h3>
+
+<p>The topic of this page is Self Organizing maps (SOM). A SOM results in a new representation of your high-dimensional data. This new representation is usually 2D or 3D, so it can be interpreted by humans. The inspiration for SOM comes from neuroscience. The structuring that neurons use to represent information is the same structuring that SOM is trained for.</p>
+
+<h3>
+<a id="representation" class="anchor" href="#representation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Representation</h3>
+
+<p>Neurons represent information with the following maxim "local neurons, represent similar information". From this statement, the algorithm is derived. For simplicity, we put our neurons in a square lattice:</p>
+
+<p><img src="https://github.com/RobRomijnders/SOM_blog/blob/master/lattice.png?raw=true" alt="image of lattice">
+<em>Image from Haykin09</em></p>
+
+<p>Now, in plain English words, we expect the following from our neurons:</p>
+
+<ul>
+<li>Neighboring neurons represent similar parts of the input space. The concept "neighbor" is defined in the lattice.</li>
+<li>Contrary to the first point, we want the neurons to represent the complete input space. Therefore, we allow neurons during the training process to differentiate with respect to their neighbors.</li>
+</ul>
+
+<p>To achieve this dichotomy between neurons representing similar parts of the input space, but also represent the complete input space, we train the SOM with these two settings:</p>
+
+<ul>
+<li>During the training, we narrow the neighborhood function. That is, in the start of the training, we define neighboring neurons in a broad manner. Over time, the neighboring neurons will influence eachother less.</li>
+<li>To allow the differentiation, we decrease the adaptation of the neurons in the input space. Initially, the neurons can move very quickly in the input space. Over time, the so-called learning rate decreases. With smaller learning rates, the neurons move less abruptly in the input space.</li>
+</ul>
+
+<h3>
+<a id="running-an-som-on-mnist" class="anchor" href="#running-an-som-on-mnist" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Running an SOM on MNIST</h3>
+
+<p>Eventually, we work toward representations like this:
+<img src="https://github.com/RobRomijnders/SOM_MNIST/blob/master/vis_nn.png?raw=true" alt="image of SOM in MNIST ">
+<em>SOM on MNIST</em>
+In this image, we deploy a ten by ten lattice. The dataset is MNIST, where numbers 1 and 8 are left out.</p>
+
+<h3>
+<a id="general-outline-of-the-training-procedure" class="anchor" href="#general-outline-of-the-training-procedure" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>General outline of the training procedure</h3>
+
+<p>During the training procedure, we want neighboring neurons to specialize to some part of the input space. To this end, we pick random samples from the dataset and allign neurons with them. This allignment holds for the neuron that is already closest to the incoming sample. And its neighbors of course.
+So the outline will be:</p>
+
+<ul>
+<li>Pick a random sample from the dataset</li>
+<li>Determine the closest neuron</li>
+<li>Move the winning neuron towards the incoming sample. Also move the neighbors in the direction of this sample, but to a lesser amount. This amount is determined by the neighborhood function in the lattice. 
+
+<ul>
+<li>The moves in the input space are parameterized by a learning rate.</li>
+<li>The neighborhood function in the lattice is parameterized by a variance.</li>
+</ul>
+</li>
+<li>For the next step:
+
+<ul>
+<li>Update the learning rate</li>
+<li>Update the variance</li>
+</ul>
+</li>
+<li>Repeat until convergence</li>
+</ul>
+
+<h3>
+<a id="tips-for-debugging" class="anchor" href="#tips-for-debugging" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tips for debugging</h3>
+
+<ul>
+<li>The mechanisms of SOM take place on two spaces. One is your input space, which can be high dimensional. Second is your lattice, which is usually 2D or 3D. These concepts are tied together by the neurons. Each neuron has a location in the lattice, which remains fixed throughout training. The neuron also has a location in the input space. The latter is sometimes referred to as his weights. </li>
+<li>Your first and foremost debugging step is to plot your learning rates and variances. I've been helping peer students that were debugging for hours, only to discover their learning rate decay was faulty.</li>
+<li>Plot a few of your weights as a monitor. Your neurons are represented by numbers in some matrix you defined. By plotting these numbers, you can develop a feel for the training procedure. I've included my example below.
+<img src="https://github.com/RobRomijnders/SOM_MNIST/blob/master/monitor.png?raw=true" alt="Monitor for training SOM">
+</li>
+</ul>
+
+<p>The code is on my GitHub in the repository SOM_MNIST. It contains many comment statements so that you can adapt it to your own liking or use it to compare your implementation of SOM.</p>
+
+<p>As always, I am curious to any comments and questions. Reach me at <a href="mailto:romijndersrob@gmail.com">romijndersrob@gmail.com</a> </p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/RobRomijnders">RobRomijnders</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
